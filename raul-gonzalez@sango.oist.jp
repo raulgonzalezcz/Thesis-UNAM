@@ -8,6 +8,8 @@ import numpy, matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.pylab as pylab
 import pandas as pd
+import scipy
+import scipy.spatial.distance as ssd
 
 from scipy.cluster import hierarchy
 from scipy.spatial import distance
@@ -197,11 +199,17 @@ def run_simulation_with_learning(graph,m_weights_o,tests):
 	plotResultsMethod(relaxation_length,tests_record, "Self-modeling of network with learning")
 	return dict_states
 
-def cluster_graph(graph,name):
-	#Clustering
+def cluster_graph(graph,name,m_weights):
+	#Clustering coefficient based on connections
+	cc=nx.average_clustering(graph)
+	print("Output of Global CC", cc)
+	c=nx.clustering(graph) 
+	print("Output of local CC ", c)
+	
 	print("Clustering the graph...")
 	path_length=nx.all_pairs_shortest_path_length(graph)
-	print(path_length)
+	# According to average path length
+	"""
 	n = len(graph.nodes())
 	distances=numpy.zeros((n,n))
 	for u,p in path_length:
@@ -212,11 +220,27 @@ def cluster_graph(graph,name):
 	hierarchy.dendrogram(hier)
 	pylab.savefig(name,format="png")
 	print("Clustering completed!")
+	"""
+	# According to weighted edges
+	# convert the redundant n*n square matrix form into a condensed nC2 array
+	# distArray[{n choose 2}-{n-i choose 2} + (j-i-1)] is the distance between points i and j
+	distArray = ssd.squareform(m_weights)
+	sd = distance.squareform(distArray)
+	hier = hierarchy.average(sd)
+	hierarchy.dendrogram(hier)
+	pylab.savefig(name,format="png")
+	print("Clustering completed!")
+	
+
+def show_weighted_edges(m_weights):
+	print(m_weights)
+	
 
 # Watt-Strogatz small world configuration
-tests = 10
+tests = 1
 number_nodes = 100
-graph = nx.random_graphs.watts_strogatz_graph(number_nodes,50,0.5)  #Nodes, most connections, probability of conection
+most_connections = math.floor(number_nodes / 2)
+graph = nx.random_graphs.watts_strogatz_graph(number_nodes,most_connections,0.5)  #Nodes, most connections, probability of conection
 #graph = nx.complete_graph(number_nodes)
 print("Number of nodes:")
 print(nx.number_of_nodes(graph)) # Prints out the nodes
@@ -235,7 +259,9 @@ states = run_simulation_with_learning(graph,m_weights,tests)
 # Show results
 plot_graph(graph, states)
 
-cluster_graph(graph,"init.png")
+# Clustering method
+show_weighted_edges(m_weights)
+cluster_graph(graph,"init.png",m_weights)
 
 
 
