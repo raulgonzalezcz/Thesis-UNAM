@@ -291,7 +291,7 @@ def run_simulation_with_learning(graph,tests,relaxation_length,label_plot):
 
 		# Set new states
 		set_states(graph)
-		get_edge_data(graph)
+		#get_edge_data(graph)
 
 
 	# Plot results
@@ -336,12 +336,13 @@ def cluster_graph(graph,name,m_weights):
 	
 
 def show_weighted_edges(m_weights):
-	print(m_weights)	
+	print(m_weights)
+	
 
 # Configuration variables
 tests = 1000
-number_nodes = 50
-relaxation_length = 20*number_nodes
+number_nodes = 100
+relaxation_length = 10*number_nodes
 
 #k_neighbors = int(number_nodes *.75)
 k_neighbors = 8
